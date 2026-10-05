@@ -1,0 +1,1075 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Rotina de Estudos</title>
+<style>
+  :root {
+    --fundo: #f6f5f2; --superficie: #ffffff; --texto: #1f2933; --suave: #6b7280; --borda: #e3e1dc;
+    --destaque: #3f6b5e; --sobre-destaque: #ffffff;
+    /* cores dos blocos: fundo / borda */
+    --aula-bg: #d9e6f2;      --aula-bd: #7fa6c9;
+    --palestra-bg: #e8eef5;  --palestra-bd: #a5bcd3;
+    --pratica-bg: #d5ece6;   --pratica-bd: #6fb3a3;
+    --laranja-bg: #f6e0cf;   --laranja-bd: #d49a6a;
+    --roxa-bg: #e5dcf0;      --roxa-bd: #9a85bd;
+    --refeicao-bg: #eeede9;  --refeicao-bd: #d6d3cc;
+    --academia-bg: #efe7d6;  --academia-bd: #c4a86a;
+    --missa-bg: #ece9e4;     --missa-bd: #b5b0a6;
+    --estudo-bg: #e3f1dc;    --estudo-bd: #7aa86a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-tema="claro"]) {
+      --fundo: #17191c; --superficie: #1f2226; --texto: #e6e8ea; --suave: #9aa3ad; --borda: #33383e;
+      --destaque: #7fb3a3; --sobre-destaque: #10201b;
+      --aula-bg: #26394a;      --aula-bd: #4f7799;
+      --palestra-bg: #2b3744;  --palestra-bd: #55708a;
+      --pratica-bg: #1f3d37;   --pratica-bd: #4a8a7b;
+      --laranja-bg: #4a3523;   --laranja-bd: #a8723f;
+      --roxa-bg: #382f4a;      --roxa-bd: #7461a0;
+      --refeicao-bg: #2a2c2f;  --refeicao-bd: #3d4146;
+      --academia-bg: #3f3826;  --academia-bd: #8f7a42;
+      --missa-bg: #2f2e2b;     --missa-bd: #5c5a54;
+      --estudo-bg: #263a21;    --estudo-bd: #5f8a52;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fundo); color: var(--texto);
+         font: 15px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header, main, footer { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+  header, main { min-width: 0; }
+  h1 { font-size: 1.25rem; margin: 18px 0 4px; font-weight: 600; }
+  .sub { color: var(--suave); font-size: .85rem; margin: 0 0 12px; }
+  .sub button { background: none; border: none; color: var(--destaque); text-decoration: underline;
+                cursor: pointer; font: inherit; padding: 0; }
+
+  /* escolha da semana */
+  .semanas { display: inline-flex; border: 1px solid var(--borda); border-radius: 10px; overflow: hidden; background: var(--superficie); }
+  .semanas button { border: 0; background: none; color: var(--texto); padding: 9px 16px; font: inherit; cursor: pointer; }
+  .semanas button[aria-pressed="true"] { font-weight: 600; }
+  .semanas button[data-s="laranja"][aria-pressed="true"] { background: var(--laranja-bg); box-shadow: inset 0 -3px 0 var(--laranja-bd); }
+  .semanas button[data-s="roxa"][aria-pressed="true"] { background: var(--roxa-bg); box-shadow: inset 0 -3px 0 var(--roxa-bd); }
+
+  /* legenda */
+  .legenda { display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 12px 0; font-size: .78rem; color: var(--suave); }
+  .legenda i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; border: 1px solid; }
+
+  /* abas de dia (só no celular) */
+  .abas { display: none; gap: 4px; margin-bottom: 8px; }
+  .abas button { flex: 1; min-width: 0; padding: 9px 0; border: 1px solid var(--borda); background: var(--superficie);
+                 color: var(--texto); border-radius: 8px; font: inherit; cursor: pointer; }
+  .abas button[aria-pressed="true"] { background: var(--destaque); border-color: var(--destaque); color: var(--sobre-destaque); }
+
+  /* grade do horário */
+  .grade { display: grid; grid-template-columns: 40px repeat(7, minmax(0, 1fr)); background: var(--superficie);
+           border: 1px solid var(--borda); border-radius: 12px; overflow: hidden; }
+  .cab { padding: 8px 4px; text-align: center; font-weight: 600; font-size: .85rem; border-bottom: 1px solid var(--borda);
+         display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .cab.hoje { color: var(--destaque); }
+  .cab button { border: 1px solid var(--borda); background: none; color: var(--suave); border-radius: 6px;
+                width: 22px; height: 22px; line-height: 1; cursor: pointer; font-size: 14px; padding: 0; }
+  .eixo { position: relative; }
+  .eixo span { position: absolute; right: 5px; font-size: .68rem; color: var(--suave); transform: translateY(-50%); }
+  .col { position: relative; border-left: 1px solid var(--borda);
+         background-image: linear-gradient(var(--borda) 1px, transparent 1px); }
+  .col.hoje { background-color: color-mix(in srgb, var(--destaque) 6%, transparent); }
+
+  .bloco { position: absolute; left: 2px; right: 2px; border-radius: 6px; padding: 3px 5px; overflow: hidden;
+           font-size: .72rem; line-height: 1.25; border: 1px solid; background: var(--b-bg); border-color: var(--b-bd); }
+  .bloco b { font-weight: 600; display: block; }
+  .bloco small { color: var(--suave); font-size: .66rem; }
+  .bloco .tag { font-size: .6rem; border: 1px solid currentColor; border-radius: 4px; padding: 0 3px; margin-left: 3px; opacity: .8; }
+  .bloco.curto b, .bloco.curto small { display: inline; }
+  .bloco.curto small { margin-left: 6px; }
+  .bloco.curto { padding-top: 1px; padding-bottom: 1px; }
+  .t-aula { --b-bg: var(--aula-bg); --b-bd: var(--aula-bd); }
+  .t-palestra { --b-bg: var(--palestra-bg); --b-bd: var(--palestra-bd); }
+  .t-pratica { --b-bg: var(--pratica-bg); --b-bd: var(--pratica-bd); }
+  .t-estagio-laranja { --b-bg: var(--laranja-bg); --b-bd: var(--laranja-bd); }
+  .t-estagio-roxa { --b-bg: var(--roxa-bg); --b-bd: var(--roxa-bd); }
+  .t-refeicao { --b-bg: var(--refeicao-bg); --b-bd: var(--refeicao-bd); color: var(--suave); border-style: dashed; }
+  .t-academia { --b-bg: var(--academia-bg); --b-bd: var(--academia-bd); }
+  .t-missa { --b-bg: var(--missa-bg); --b-bd: var(--missa-bd); }
+  .t-estudo { --b-bg: var(--estudo-bg); --b-bd: var(--estudo-bd); border-style: dashed; z-index: 2; }
+  .bloco { cursor: pointer; }
+  .bloco:hover, .bloco:focus-visible { outline: 2px solid var(--b-bd); z-index: 3; }
+
+  /* configurações */
+  details { margin: 16px 0; background: var(--superficie); border: 1px solid var(--borda); border-radius: 12px; padding: 10px 14px; }
+  summary { cursor: pointer; font-weight: 600; }
+  .campo { margin: 12px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+  .campo label.t { min-width: 210px; }
+  input[type=number], input[type=time], input[type=date], input[type=text], input[type=search], textarea, select { font: inherit; padding: 6px 8px; border: 1px solid var(--borda);
+        border-radius: 8px; background: var(--fundo); color: var(--texto); }
+  .dias { display: flex; gap: 6px; flex-wrap: wrap; }
+  .dias label { border: 1px solid var(--borda); border-radius: 8px; padding: 5px 10px; cursor: pointer; user-select: none; }
+  .dias input { margin-right: 4px; }
+  .nota { color: var(--suave); font-size: .8rem; }
+
+  dialog { border: 1px solid var(--borda); border-radius: 14px; background: var(--superficie); color: var(--texto); padding: 18px; width: min(92vw, 360px); }
+  dialog::backdrop { background: rgba(0,0,0,.4); }
+  dialog h2 { font-size: 1.05rem; margin: 0 0 12px; }
+  dialog .linha { display: flex; gap: 10px; margin-bottom: 12px; }
+  dialog .linha label { flex: 1; display: flex; flex-direction: column; gap: 4px; font-size: .85rem; color: var(--suave); }
+  .botoes { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; margin-top: 6px; }
+  .botoes button { font: inherit; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--borda); background: none; color: var(--texto); cursor: pointer; }
+  .botoes .principal { background: var(--destaque); border-color: var(--destaque); color: var(--sobre-destaque); }
+  .botoes .perigo { color: #b4443a; }
+  .erro { color: #b4443a; font-size: .82rem; min-height: 1.2em; margin: 0 0 6px; }
+  /* navegação entre telas */
+  .nav { display: flex; gap: 4px; margin: 0 0 14px; border-bottom: 1px solid var(--borda); }
+  .nav button { border: 0; background: none; color: var(--suave); font: inherit; padding: 9px 14px; cursor: pointer;
+                border-bottom: 3px solid transparent; margin-bottom: -1px; }
+  .nav button[aria-pressed="true"] { color: var(--texto); font-weight: 600; border-bottom-color: var(--destaque); }
+  [hidden] { display: none !important; }
+
+  /* checklist de temas */
+  .painel { background: var(--superficie); border: 1px solid var(--borda); border-radius: 12px; padding: 12px 14px; margin: 0 0 14px; }
+  .painel h2 { font-size: 1rem; margin: 0 0 8px; }
+  .revisoes { border-left: 4px solid var(--academia-bd); }
+  .rev { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 8px 0; border-top: 1px solid var(--borda); }
+  .rev .nome { flex: 1 1 200px; min-width: 0; }
+  .rev small, .tema small { color: var(--suave); font-size: .78rem; display: block; }
+  .mini { font: inherit; font-size: .85rem; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--borda);
+          background: none; color: var(--texto); cursor: pointer; }
+  .mini.principal { background: var(--destaque); border-color: var(--destaque); color: var(--sobre-destaque); }
+  .mini.perigo { color: #b4443a; }
+  .barra { height: 8px; background: var(--borda); border-radius: 99px; overflow: hidden; margin-top: 6px; }
+  .barra div { height: 100%; background: var(--destaque); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
+  .chips button { font: inherit; font-size: .85rem; padding: 6px 12px; border-radius: 99px; border: 1px solid var(--borda);
+                  background: var(--superficie); color: var(--texto); cursor: pointer; }
+  .chips button[aria-pressed="true"] { background: var(--destaque); border-color: var(--destaque); color: var(--sobre-destaque); }
+  .filtros { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 6px; }
+  .filtros input { flex: 1 1 180px; min-width: 0; }
+  .grupo { font-size: .95rem; margin: 18px 0 6px; display: flex; justify-content: space-between; align-items: baseline; }
+  .grupo small { color: var(--suave); font-weight: 400; }
+  .tema { background: var(--superficie); border: 1px solid var(--borda); border-left: 4px solid var(--borda);
+          border-radius: 10px; padding: 10px 12px; margin: 0 0 8px; }
+  .tema.s-e { border-left-color: var(--estudo-bd); }
+  .tema.s-r { border-left-color: var(--academia-bd); }
+  .tema h3 { font-size: .95rem; margin: 0 0 2px; font-weight: 600; }
+  .status { display: flex; margin: 8px 0 0; border: 1px solid var(--borda); border-radius: 8px; overflow: hidden; max-width: 340px; }
+  .status button { flex: 1; font: inherit; font-size: .82rem; padding: 8px 4px; border: 0; background: none; color: var(--suave); cursor: pointer; }
+  .status button + button { border-left: 1px solid var(--borda); }
+  .status button[aria-pressed="true"] { color: var(--texto); font-weight: 600; }
+  .status button[data-v="a"][aria-pressed="true"] { background: var(--refeicao-bg); }
+  .status button[data-v="e"][aria-pressed="true"] { background: var(--estudo-bg); }
+  .status button[data-v="r"][aria-pressed="true"] { background: var(--academia-bg); }
+  .tema details { margin: 8px 0 0; padding: 0; border: 0; background: none; }
+  .tema summary { font-weight: 400; font-size: .85rem; color: var(--suave); }
+  .tema ul { list-style: none; margin: 6px 0 0; padding: 0; }
+  .tema li label { display: flex; gap: 8px; padding: 5px 0; font-size: .88rem; cursor: pointer; }
+  .tema li input { margin-top: 3px; flex: none; }
+  .acoes { display: flex; gap: 6px; margin-top: 8px; }
+  .vazio-msg { color: var(--suave); padding: 16px 0; text-align: center; }
+  .grupoCfg { font-size: .85rem; color: var(--suave); text-transform: uppercase; letter-spacing: .04em; margin: 18px 0 0; }
+  dialog label.bloco-campo { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; color: var(--suave); margin-bottom: 12px; }
+  textarea { width: 100%; min-height: 90px; resize: vertical; }
+  /* topo com o botão de registrar */
+  .topo { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin: 18px 0 6px; }
+  .topo h1 { margin: 0; }
+  .marca { display: flex; gap: 8px; align-items: flex-start; font-size: .9rem; margin-bottom: 10px; cursor: pointer; }
+  .marca input { margin-top: 3px; }
+
+  /* calendário e sequência */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin: 0 0 14px; }
+  .stat { background: var(--superficie); border: 1px solid var(--borda); border-radius: 12px; padding: 10px 12px; font-size: .8rem; color: var(--suave); }
+  .stat b { display: block; font-size: 1.35rem; color: var(--texto); font-weight: 600; }
+  .calTopo { display: flex; align-items: center; justify-content: space-between; margin: 0 0 10px; }
+  .calTopo h2 { margin: 0; font-size: 1rem; }
+  .calTopo h2::first-letter { text-transform: uppercase; }
+  .cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+  .cal .sem { text-align: center; font-size: .72rem; color: var(--suave); padding-bottom: 2px; }
+  .cal button { height: 52px; border: 1px solid var(--borda); border-radius: 8px; background: none; color: var(--texto); font: inherit;
+                cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0; line-height: 1.2; }
+  .cal button small { font-size: .62rem; color: inherit; opacity: .8; }
+  .cal button:disabled { opacity: .35; cursor: default; }
+  .cal .n1 { background: color-mix(in srgb, var(--estudo-bd) 22%, transparent); }
+  .cal .n2 { background: color-mix(in srgb, var(--estudo-bd) 50%, transparent); }
+  .cal .n3 { background: color-mix(in srgb, var(--estudo-bd) 85%, transparent); }
+  .cal .hoje { border: 2px solid var(--destaque); font-weight: 600; }
+  .cal .sel { outline: 2px solid var(--texto); outline-offset: 1px; }
+  .calLegenda { display: flex; gap: 12px; flex-wrap: wrap; font-size: .75rem; color: var(--suave); margin-top: 10px; }
+  .calLegenda i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; border: 1px solid var(--borda); }
+  footer { color: var(--suave); font-size: .78rem; padding-bottom: 28px; }
+
+  @media (max-width: 760px) {
+    .abas { display: flex; }
+    .grade { grid-template-columns: 38px minmax(0, 1fr); }
+    .cab:not(.vazio), .col { display: none; }
+    .cab.ativo, .col.ativo { display: flex; }
+    .col.ativo { display: block; }
+    .bloco { font-size: .8rem; padding: 4px 7px; }
+    .bloco small { font-size: .72rem; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="topo">
+    <h1>Rotina de Estudos</h1>
+    <button type="button" class="mini principal" id="btnRegistrar">+ Registrar estudo</button>
+  </div>
+  <nav class="nav" aria-label="Telas">
+    <button type="button" data-v="horario">Horário</button>
+    <button type="button" data-v="temas">Temas</button>
+    <button type="button" data-v="calendario">Calendário</button>
+  </nav>
+</header>
+
+<main>
+  <section id="vHorario">
+    <p class="sub" id="statusSemana"></p>
+    <div class="semanas" role="group" aria-label="Escolher semana">
+      <button data-s="laranja" type="button">Semana Laranja</button>
+      <button data-s="roxa" type="button">Semana Roxa</button>
+    </div>
+    <div class="legenda" id="legenda"></div>
+    <div class="abas" id="abas" role="group" aria-label="Escolher dia"></div>
+    <div class="grade" id="grade"></div>
+  </section>
+
+  <section id="vTemas" hidden>
+    <div class="painel revisoes" id="revisoes"></div>
+    <div class="painel" id="progresso"></div>
+    <div class="chips" id="chipsOrigem" role="group" aria-label="Filtrar por origem"></div>
+    <div class="chips" id="chipsEsp" role="group" aria-label="Filtrar por especialidade"></div>
+    <div class="filtros">
+      <div class="chips" id="chipsStatus" role="group" aria-label="Filtrar por status" style="margin:0"></div>
+      <input type="search" id="buscaTema" placeholder="Buscar tema…" aria-label="Buscar tema">
+      <button type="button" class="mini principal" id="btnNovoTema">+ Adicionar tema</button>
+    </div>
+    <div id="listaTemas"></div>
+  </section>
+
+  <section id="vCalendario" hidden>
+    <div class="stats" id="stats"></div>
+    <div class="painel" id="calPainel"></div>
+    <div class="painel" id="diaPainel"></div>
+  </section>
+
+  <details>
+    <summary>Configurações</summary>
+    <p class="grupoCfg">Horário</p>
+    <div class="campo">
+      <label class="t" for="cfgMeta">Meta mínima de estudo por dia (horas)</label>
+      <input type="number" id="cfgMeta" min="1" max="10" step="0.5">
+    </div>
+    <div class="campo">
+      <label class="t" for="cfgBloco">Duração máxima de cada bloco de estudo</label>
+      <select id="cfgBloco">
+        <option value="60">1 hora</option><option value="90">1h30</option><option value="120">2 horas</option>
+        <option value="180">3 horas</option><option value="240">4 horas</option>
+      </select>
+    </div>
+    <div class="campo">
+      <span class="t" style="min-width:210px">Dias de academia</span>
+      <div class="dias" id="cfgAcademia"></div>
+    </div>
+    <p class="nota">Toque em qualquer bloco do horário para mudar o nome, o horário ou remover. Os blocos verdes de estudo são sugestões; o botão “+” do dia adiciona um.
+       Mudou uma aula ou um estágio? Vale para todas as semanas em que ele aparece. Mudou refeição, academia ou missa? Vale só para aquele dia daquela semana.
+       O botão “↺” do dia desfaz tudo o que você mudou nele (inclusive blocos removidos).</p>
+
+    <p class="grupoCfg">Revisão espaçada</p>
+    <div class="campo">
+      <label class="t" for="cfgIntervalos">Revisar depois de quantos dias</label>
+      <input type="text" id="cfgIntervalos" inputmode="numeric" style="width:130px">
+    </div>
+    <div class="campo">
+      <label class="t" for="cfgLimite">Máximo de revisões por dia</label>
+      <input type="number" id="cfgLimite" min="1" max="30" step="1">
+    </div>
+    <p class="nota">Ao marcar um tema como estudado, o app agenda as revisões nesses intervalos (ex.: 1, 7, 30 = no dia seguinte, uma semana depois da 1ª revisão e um mês depois da 2ª).</p>
+
+    <p class="grupoCfg">Calendário</p>
+    <div class="campo">
+      <label class="t" for="cfgFolga">Dias de pausa que não quebram a sequência</label>
+      <select id="cfgFolga"><option value="0">Nenhum</option><option value="1">1 dia</option><option value="2">2 dias seguidos</option></select>
+    </div>
+
+    <p class="grupoCfg">Seus dados</p>
+    <div class="campo">
+      <button type="button" class="mini" id="btnExportar">Exportar dados</button>
+      <button type="button" class="mini" id="btnImportar">Importar dados</button>
+      <input type="file" id="arqImportar" accept="application/json,.json" hidden>
+    </div>
+    <p class="nota">Exportar gera um arquivo com tudo o que você registrou (cópia de segurança). Importar carrega esse arquivo em outro aparelho e substitui os dados que estiverem nele.
+       Importar também aceita o arquivo de objetivos dos temas (<i>objetivos-ci3.json</i>): nesse caso só os objetivos entram, e o seu progresso fica como está.</p>
+  </details>
+</main>
+
+<footer>Seus dados ficam salvos neste navegador. Faça uma cópia de vez em quando em Configurações → Exportar dados.</footer>
+
+<dialog id="dlg">
+  <form method="dialog" id="dlgForm">
+    <h2 id="dlgTitulo">Bloco de estudo</h2>
+    <label class="bloco-campo" id="dlgNomeCampo">Nome <input type="text" id="dlgNome" maxlength="60"></label>
+    <div class="linha">
+      <label>Início <input type="time" id="dlgIni" step="300" required></label>
+      <label>Fim <input type="time" id="dlgFim" step="300" required></label>
+    </div>
+    <p class="erro" id="dlgErro" role="alert"></p>
+    <div class="botoes">
+      <button type="button" class="perigo" id="dlgRemover">Remover</button>
+      <button type="button" id="dlgRestaurar">Voltar ao original</button>
+      <button type="button" id="dlgCancelar">Cancelar</button>
+      <button type="submit" class="principal">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlgTema">
+  <form method="dialog" id="temaForm">
+    <h2 id="temaTitulo">Novo tema</h2>
+    <label class="bloco-campo">Nome do tema <input type="text" id="temaNome" required maxlength="140"></label>
+    <label class="bloco-campo">Especialidade <select id="temaEsp"></select></label>
+    <label class="bloco-campo">Objetivos (opcional, um por linha) <textarea id="temaObj"></textarea></label>
+    <div class="botoes">
+      <button type="button" id="temaCancelar">Cancelar</button>
+      <button type="submit" class="principal">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlgReg">
+  <form method="dialog" id="regForm">
+    <h2>Registrar estudo</h2>
+    <label class="bloco-campo">Tema <select id="regTema"></select></label>
+    <label class="bloco-campo" id="regOutroCampo">Qual assunto? <input type="text" id="regOutro" maxlength="140"></label>
+    <label class="bloco-campo">Tempo gasto (minutos) <input type="number" id="regMin" min="5" max="720" step="5" required></label>
+    <div class="chips" id="regAtalhos" role="group" aria-label="Atalhos de tempo">
+      <button type="button" data-min="30">30 min</button><button type="button" data-min="60">1h</button>
+      <button type="button" data-min="90">1h30</button><button type="button" data-min="120">2h</button><button type="button" data-min="180">3h</button>
+    </div>
+    <label class="bloco-campo">Dia <input type="date" id="regData" required></label>
+    <label class="marca"><input type="checkbox" id="regRevisar"><span>Preciso revisar (o tema volta para a fila de revisão no dia seguinte)</span></label>
+    <p class="erro" id="regErro" role="alert"></p>
+    <div class="botoes">
+      <button type="button" id="regCancelar">Cancelar</button>
+      <button type="submit" class="principal">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="temas.js"></script>
+<script>
+"use strict";
+
+/* ============ 1. DADOS FIXOS (é aqui que se muda um horário) ============
+   [dia, início, fim, título, tipo, semana, etiqueta]
+   dia: 0=segunda ... 6=domingo · semana: "ambas", "laranja" ou "roxa" */
+const FIXOS = [
+  // Comum às duas semanas (8º período)
+  [0, "15:40", "17:30", "HAM Prática", "pratica", "ambas"],
+  [0, "18:00", "18:50", "HAM Palestra (todos)", "palestra", "ambas"],
+  [0, "20:30", "21:20", "Palestra C. Cirúrgica", "palestra", "ambas"],
+  [1, "18:00", "20:30", "MARC", "aula", "ambas"],
+  [1, "20:30", "21:20", "MARC Palestra", "palestra", "ambas"],
+  [2, "18:30", "20:10", "IESC Palestra", "palestra", "ambas"],
+  [3, "21:00", "21:50", "IESC 04 Prática", "pratica", "ambas"],
+  [4, "18:00", "20:30", "MARC", "aula", "ambas"],
+  [4, "20:30", "21:20", "MARC Palestra", "palestra", "ambas"],
+  // HAM do 4º período (iguais nas duas semanas)
+  [0, "08:00", "09:40", "HAM Prática (Criança)", "pratica", "ambas", "4º"],
+  [0, "11:30", "12:20", "HAM Palestra (Criança)", "palestra", "ambas", "4º"],
+  [2, "07:30", "08:20", "HAM Palestra (Adulto)", "palestra", "ambas", "4º"],
+  [2, "08:30", "10:10", "HAM Prática (Adulto)", "pratica", "ambas", "4º"],
+  // Estágios: o que muda entre as semanas
+  [1, "07:50", "12:00", "CI Prática · Dermatologia", "estagio", "laranja"],
+  [4, "07:50", "12:00", "UBS Novo Horizonte", "estagio", "laranja"],
+  [1, "13:50", "18:00", "CI Prática · Urologia", "estagio", "roxa"],
+  [3, "13:50", "18:00", "CI Prática · Endócrino", "estagio", "roxa"],
+];
+
+const REFEICOES = [["almoco", "12:30", "13:30", "Almoço"], ["cafeTarde", "16:30", "17:30", "Café da tarde"], ["jantar", "20:30", "21:00", "Jantar"]];
+const CAFE_MANHA_CEDO = "07:00", CAFE_MANHA_NORMAL = "08:30", CAFE_MANHA_DURACAO = 30;   // cedo = dia com aula ou estágio antes das 09:00
+const MISSA = [6, "18:30", "20:00", "Missa"];
+const ACADEMIA_DURACAO = 60;                 // minutos (suposição: 1 hora)
+const ACADEMIA_MANHA = "10:00", ACADEMIA_TARDE = "15:30";
+const JANELA_SEMANA = [8 * 60 + 30, 22 * 60]; // estudo de segunda a sexta: 08:30–22:00
+const JANELA_FIMSEMANA = [14 * 60, 18 * 60];  // sábado e domingo: 14:00–18:00 (noite livre)
+const DIAS = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+const EIXO_INI = 7 * 60, EIXO_FIM = 22 * 60, PX_MIN = 0.85;   // desenho: 07:00–22:00
+const ANCORA_LARANJA = new Date(2026, 8, 28);  // segunda-feira 28/09/2026 = semana laranja
+
+/* ============ 2. UTILIDADES ============ */
+const min = h => { const [a, b] = h.split(":"); return +a * 60 + +b; };
+const hora = m => String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
+const sobrepoe = (a, b) => a[0] < b[1] && b[0] < a[1];
+
+/* ============ 3. ESTADO (salvo no navegador) ============ */
+const CHAVE = "estudos.v1";
+const PADRAO = { inverter: false,
+                 config: { metaH: 3, blocoMax: 180, academiaDias: [0, 1, 2, 3, 4], intervalos: [1, 7, 30], limiteRev: 5, folga: 1 },
+                 estudo: { laranja: {}, roxa: {} },
+                 temas: {},            // por tema: { estudadoEm, etapa, proxima, revisadoEm, obj }
+                 temasProprios: [],    // temas que você mesmo adicionou
+                 registros: [],        // cada estudo registrado: { id, data, temaId, nome, min, revisar }
+                 ajustes: {},          // blocos do horário que você editou: { ini, fim, titulo } ou { oculto: true }
+                 objetivos: {} };      // objetivos dos temas, importados de um arquivo seu: { idDoTema: ["...", "..."] }
+let estado = carregar();
+
+/* junta o que estava salvo com os valores padrão (assim, dados antigos continuam valendo quando o app ganha novidades) */
+function normalizar(salvo) {
+  const base = structuredClone(PADRAO);
+  if (!salvo || typeof salvo !== "object") return base;
+  return { ...base, ...salvo, config: { ...base.config, ...salvo.config },
+           estudo: { laranja: {}, roxa: {}, ...salvo.estudo } };
+}
+function carregar() {
+  try { return normalizar(JSON.parse(localStorage.getItem(CHAVE))); }
+  catch (e) { return normalizar(null); }   // sem acesso ao armazenamento: segue com o padrão
+}
+function salvar() { try { localStorage.setItem(CHAVE, JSON.stringify(estado)); } catch (e) {} }
+
+/* qual é a semana de hoje? alterna a cada segunda-feira a partir da âncora */
+function semanaAtual() {
+  const hoje = new Date(); const seg = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+  seg.setDate(seg.getDate() - ((seg.getDay() + 6) % 7));
+  const semanas = Math.round((seg - ANCORA_LARANJA) / (7 * 864e5));
+  let laranja = semanas % 2 === 0;
+  if (estado.inverter) laranja = !laranja;
+  return laranja ? "laranja" : "roxa";
+}
+const diaDeHoje = () => (new Date().getDay() + 6) % 7;
+
+/* ============ 4. MONTAR O DIA ============ */
+/* Ajustes = o que você mudou tocando num bloco. Cada bloco tem uma "chave" que o identifica.
+   Aulas e estágios: chave "f" + posição na lista FIXOS. Blocos pessoais: valem para aquela semana e aquele dia. */
+const chaveAjuste = (semana, dia, chave) => /^f\d+$/.test(chave) ? chave : `${semana}|${dia}|${chave}`;
+function comAjuste(semana, dia, b) {   // devolve o bloco como você deixou, ou null se você o removeu
+  const a = estado.ajustes[chaveAjuste(semana, dia, b.chave)];
+  if (!a) return b;
+  return a.oculto ? null : { ...b, ini: a.ini, fim: a.fim, titulo: a.titulo };
+}
+/* chaves de ajuste que pertencem a um dia (para o botão ↺ saber o que desfazer) */
+function ajustesDoDia(semana, dia) {
+  return Object.keys(estado.ajustes).filter(k => {
+    const m = /^f(\d+)$/.exec(k), f = m && FIXOS[m[1]];
+    return m ? !!f && f[0] === dia && (f[5] === "ambas" || f[5] === semana) : k.startsWith(`${semana}|${dia}|`);
+  });
+}
+
+function fixosDoDia(semana, dia) {
+  return FIXOS.map((f, i) => ({ f, i })).filter(({ f }) => f[0] === dia && (f[5] === "ambas" || f[5] === semana))
+    .map(({ f, i }) => comAjuste(semana, dia, { chave: "f" + i, ini: min(f[1]), fim: min(f[2]), titulo: f[3],
+                 tipo: f[4] === "estagio" ? "estagio-" + semana : f[4], estagio: f[4] === "estagio", tag: f[6] }))
+    .filter(Boolean);
+}
+
+/* academia: 10:00 se não há estágio de manhã, 15:30 se há. Se bater com uma aula, anda para o próximo horário livre. */
+function academiaDoDia(dia, fixos) {
+  if (!estado.config.academiaDias.includes(dia)) return null;
+  const estagioManha = fixos.some(f => f.estagio && f.ini < 12 * 60);
+  let ini = min(estagioManha ? ACADEMIA_TARDE : ACADEMIA_MANHA);
+  for (let i = 0; i < 20; i++) {
+    const choque = fixos.find(f => sobrepoe([ini, ini + ACADEMIA_DURACAO], [f.ini, f.fim]));
+    if (!choque) break;
+    ini = choque.fim;
+  }
+  if (ini + ACADEMIA_DURACAO > JANELA_SEMANA[1] + 60) return null;
+  return { chave: "academia", ini, fim: ini + ACADEMIA_DURACAO, titulo: "Academia", tipo: "academia" };
+}
+
+function pessoaisDoDia(semana, dia, fixos) {
+  const lista = [];
+  /* se você editou o bloco, vale o que você definiu; senão vale a regra automática (refeição que bate com outra coisa é omitida) */
+  const incluir = (base, omitirSeBater) => {
+    if (!base) return;
+    const editado = estado.ajustes[chaveAjuste(semana, dia, base.chave)];
+    const bate = () => [...fixos, ...lista].some(o => sobrepoe([base.ini, base.fim], [o.ini, o.fim]));
+    const b = editado ? comAjuste(semana, dia, base) : (omitirSeBater && bate() ? null : base);
+    if (b) lista.push(b);
+  };
+  incluir(academiaDoDia(dia, fixos), false);
+  if (dia === MISSA[0]) incluir({ chave: "missa", ini: min(MISSA[1]), fim: min(MISSA[2]), titulo: MISSA[3], tipo: "missa" }, false);
+  const cafe = min(fixos.some(f => f.ini < 9 * 60) ? CAFE_MANHA_CEDO : CAFE_MANHA_NORMAL);
+  incluir({ chave: "cafeManha", ini: cafe, fim: cafe + CAFE_MANHA_DURACAO, titulo: "Café da manhã", tipo: "refeicao" }, true);
+  for (const [chave, i, f, t] of REFEICOES) incluir({ chave, ini: min(i), fim: min(f), titulo: t, tipo: "refeicao" }, true);
+  return lista;
+}
+
+/* sugestão de estudo: ocupa os horários livres, preferindo tarde e noite, em blocos seguidos */
+function sugerirEstudo(dia, ocupados, fixos) {
+  const [j0, j1] = dia >= 5 ? JANELA_FIMSEMANA : JANELA_SEMANA;
+  const busy = ocupados.map(o => [o.ini, o.fim]).sort((a, b) => a[0] - b[0]);
+  const livres = []; let cursor = j0;
+  for (const [a, b] of busy) {
+    if (b <= cursor) continue;
+    if (a > cursor) livres.push([cursor, Math.min(a, j1)]);
+    cursor = Math.max(cursor, b);
+    if (cursor >= j1) break;
+  }
+  if (cursor < j1) livres.push([cursor, j1]);
+
+  const ocupadoFixo = fixos.reduce((s, f) => s + (f.fim - f.ini), 0);
+  const meta = estado.config.metaH * 60 + (ocupadoFixo < 240 ? 90 : 0);   // dia mais livre → sugere um pouco mais
+  const preferencia = ([a]) => (a >= 13 * 60 ? 0 : 1);
+  const candidatos = livres.filter(([a, b]) => b - a >= 60)
+    .sort((x, y) => preferencia(x) - preferencia(y) || (y[1] - y[0]) - (x[1] - x[0]));
+
+  const sugeridos = []; let total = 0;
+  for (const [a, b] of candidatos) {
+    let ini = a;
+    while (ini + 60 <= b && total < meta) {
+      let dur = Math.min(estado.config.blocoMax, b - ini, meta - total);
+      if (dur < 60) dur = Math.min(60, b - ini);
+      sugeridos.push({ ini, fim: ini + dur, titulo: "Estudo", tipo: "estudo" });
+      total += dur; ini += dur;
+    }
+    if (total >= meta) break;
+  }
+  return sugeridos.sort((x, y) => x.ini - y.ini);
+}
+
+function montarDia(semana, dia) {
+  const fixos = fixosDoDia(semana, dia);
+  const pessoais = pessoaisDoDia(semana, dia, fixos);
+  const salvo = estado.estudo[semana][dia];
+  const estudo = salvo ? salvo.map(b => ({ ...b, titulo: "Estudo", tipo: "estudo" }))
+                       : sugerirEstudo(dia, [...fixos, ...pessoais], fixos);
+  return { fixos, pessoais, estudo, personalizado: !!salvo };
+}
+
+/* ============ 5. DESENHAR ============ */
+const $ = id => document.getElementById(id);
+let semanaVista = semanaAtual();   // sempre abre na semana de hoje
+let diaMovel = diaDeHoje();
+
+function desenhar() {
+  const atual = semanaAtual();
+  $("statusSemana").innerHTML = `Esta semana é a <b>${atual === "laranja" ? "Laranja" : "Roxa"}</b>. ` +
+    `<button type="button" id="inverter">Está errado? Inverter</button>`;
+  $("inverter").onclick = () => { estado.inverter = !estado.inverter; salvar(); semanaVista = semanaAtual(); desenhar(); };
+  document.querySelectorAll(".semanas button").forEach(b => b.setAttribute("aria-pressed", b.dataset.s === semanaVista));
+
+  $("abas").innerHTML = DIAS.map((d, i) => `<button type="button" data-d="${i}" aria-pressed="${i === diaMovel}">${d}</button>`).join("");
+  $("abas").querySelectorAll("button").forEach(b => b.onclick = () => { diaMovel = +b.dataset.d; desenhar(); });
+
+  const altura = (EIXO_FIM - EIXO_INI) * PX_MIN;
+  let html = `<div class="cab vazio"></div>`;
+  for (let d = 0; d < 7; d++) {
+    const hoje = semanaVista === atual && d === diaDeHoje();
+    html += `<div class="cab ${hoje ? "hoje" : ""} ${d === diaMovel ? "ativo" : ""}">${DIAS[d]}
+      <button type="button" data-add="${d}" title="Adicionar bloco de estudo" aria-label="Adicionar bloco de estudo ${DIAS[d]}">+</button>
+      ${estado.estudo[semanaVista][d] || ajustesDoDia(semanaVista, d).length ? `<button type="button" data-reset="${d}" title="Desfazer suas mudanças neste dia" aria-label="Desfazer mudanças de ${DIAS[d]}">↺</button>` : ""}</div>`;
+  }
+  let eixo = "";
+  for (let h = EIXO_INI / 60; h <= EIXO_FIM / 60; h++) eixo += `<span style="top:${(h * 60 - EIXO_INI) * PX_MIN}px">${h}h</span>`;
+  html += `<div class="eixo" style="height:${altura}px">${eixo}</div>`;
+
+  for (let d = 0; d < 7; d++) {
+    const dia = montarDia(semanaVista, d);
+    const hoje = semanaVista === atual && d === diaDeHoje();
+    const bg = `background-size:100% ${60 * PX_MIN}px;`;
+    html += `<div class="col ${hoje ? "hoje" : ""} ${d === diaMovel ? "ativo" : ""}" style="height:${altura}px;${bg}">`;
+    const ordem = [...dia.pessoais, ...dia.fixos, ...dia.estudo.map((b, i) => ({ ...b, indice: i }))];
+    for (const b of ordem) {
+      const top = (b.ini - EIXO_INI) * PX_MIN, h = (b.fim - b.ini) * PX_MIN - 1;
+      const eEstudo = b.tipo === "estudo";
+      html += `<div class="bloco t-${b.tipo}${h < 34 ? " curto" : ""}" style="top:${top}px;height:${h}px" data-dia="${d}"
+        ${eEstudo ? `data-i="${b.indice}"` : `data-chave="${b.chave}"`} tabindex="0" role="button" aria-label="Editar ${esc(b.titulo)}, ${hora(b.ini)} às ${hora(b.fim)}">
+        <b>${esc(b.titulo)}${b.tag ? `<span class="tag">${b.tag}</span>` : ""}</b><small>${hora(b.ini)}–${hora(b.fim)}</small></div>`;
+    }
+    html += `</div>`;
+  }
+  $("grade").innerHTML = html;
+
+  $("grade").querySelectorAll(".bloco").forEach(el => {
+    const abrir = () => el.dataset.chave ? abrirBloco(+el.dataset.dia, el.dataset.chave) : abrirDialogo(+el.dataset.dia, +el.dataset.i);
+    el.onclick = abrir; el.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); abrir(); } };
+  });
+  $("grade").querySelectorAll("[data-add]").forEach(b => b.onclick = () => abrirDialogo(+b.dataset.add, null));
+  $("grade").querySelectorAll("[data-reset]").forEach(b => b.onclick = () => {
+    const d = +b.dataset.reset;
+    delete estado.estudo[semanaVista][d];
+    for (const k of ajustesDoDia(semanaVista, d)) delete estado.ajustes[k];
+    salvar(); desenhar();
+  });
+}
+
+function desenharLegenda() {
+  const item = (cor, nome) => `<span><i style="background:var(--${cor}-bg);border-color:var(--${cor}-bd)"></i>${nome}</span>`;
+  $("legenda").innerHTML = item("aula", "Aula (MARC)") + item("palestra", "Palestra") + item("pratica", "Prática") +
+    item(semanaVista, "Estágio") + item("estudo", "Estudo (sugestão)") + item("academia", "Academia") + item("refeicao", "Refeição") +
+    `<span>4º = HAM do 4º período</span>`;
+}
+
+/* ============ 6. EDITAR BLOCOS (toque em qualquer bloco do horário) ============ */
+let editando = null;   // estudo: { dia, indice } · demais blocos: { dia, chave }
+const dlg = $("dlg");
+
+function mostrarDialogo(titulo, ini, fim, { nome = null, remover = true, restaurar = false } = {}) {
+  $("dlgTitulo").textContent = titulo;
+  $("dlgNomeCampo").hidden = nome === null; $("dlgNome").value = nome || "";
+  $("dlgIni").value = hora(ini); $("dlgFim").value = hora(fim); $("dlgErro").textContent = "";
+  $("dlgRemover").hidden = !remover; $("dlgRestaurar").hidden = !restaurar;
+  dlg.showModal();
+}
+
+/* bloco de estudo (verde): indice = posição na lista do dia, ou null para criar um novo */
+function abrirDialogo(dia, indice) {
+  editando = { dia, indice };
+  const dados = montarDia(semanaVista, dia);
+  let ini, fim;
+  if (indice === null) {
+    ini = min("20:00"); fim = min("21:00");
+    // primeiro horário livre de 1 hora dentro da janela do dia
+    const [j0, j1] = dia >= 5 ? JANELA_FIMSEMANA : JANELA_SEMANA;
+    const ocupados = [...dados.fixos, ...dados.pessoais, ...dados.estudo];
+    for (let t = j0; t + 60 <= j1; t += 30) if (!ocupados.some(o => sobrepoe([t, t + 60], [o.ini, o.fim]))) { ini = t; fim = t + 60; break; }
+  } else { ini = dados.estudo[indice].ini; fim = dados.estudo[indice].fim; }
+  mostrarDialogo((indice === null ? "Novo bloco de estudo · " : "Bloco de estudo · ") + DIAS[dia], ini, fim, { remover: indice !== null });
+}
+
+/* qualquer outro bloco: aula, estágio, refeição, academia, missa */
+function abrirBloco(dia, chave) {
+  const dados = montarDia(semanaVista, dia);
+  const b = [...dados.fixos, ...dados.pessoais].find(x => x.chave === chave);
+  if (!b) return;
+  editando = { dia, chave };
+  mostrarDialogo("Editar · " + DIAS[dia], b.ini, b.fim, { nome: b.titulo, restaurar: !!estado.ajustes[chaveAjuste(semanaVista, dia, chave)] });
+}
+
+/* ao mexer nos estudos de um dia, a lista passa a ser guardada (deixa de ser automática) */
+function listaEditavel(dia) {
+  const dados = montarDia(semanaVista, dia);
+  return dados.estudo.map(b => ({ ini: b.ini, fim: b.fim }));
+}
+
+$("dlgForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const { dia, indice, chave } = editando;
+  const erro = msg => { $("dlgErro").textContent = msg; };
+  const ini = min($("dlgIni").value), fim = min($("dlgFim").value);
+  if (!(fim > ini)) return erro("O fim precisa ser depois do início.");
+  if (ini < EIXO_INI || fim > EIXO_FIM) return erro(`Use horários entre ${hora(EIXO_INI)} e ${hora(EIXO_FIM)}.`);
+  if (chave) {
+    const titulo = $("dlgNome").value.trim();
+    if (!titulo) return erro("Dê um nome ao bloco.");
+    estado.ajustes[chaveAjuste(semanaVista, dia, chave)] = { ini, fim, titulo };
+  } else {
+    const choque = montarDia(semanaVista, dia).fixos.find(f => sobrepoe([ini, fim], [f.ini, f.fim]));
+    if (choque) return erro(`Bate com “${choque.titulo}” (${hora(choque.ini)}–${hora(choque.fim)}).`);
+    const lista = listaEditavel(dia);
+    if (indice === null) lista.push({ ini, fim }); else lista[indice] = { ini, fim };
+    lista.sort((a, b) => a.ini - b.ini);
+    estado.estudo[semanaVista][dia] = lista;
+  }
+  salvar(); dlg.close(); desenhar();
+});
+$("dlgRemover").onclick = () => {
+  const { dia, indice, chave } = editando;
+  if (chave) estado.ajustes[chaveAjuste(semanaVista, dia, chave)] = { oculto: true };
+  else { const lista = listaEditavel(dia); lista.splice(indice, 1); estado.estudo[semanaVista][dia] = lista; }
+  salvar(); dlg.close(); desenhar();
+};
+$("dlgRestaurar").onclick = () => {
+  delete estado.ajustes[chaveAjuste(semanaVista, editando.dia, editando.chave)];
+  salvar(); dlg.close(); desenhar();
+};
+$("dlgCancelar").onclick = () => dlg.close();
+
+/* ============ 7. CONFIGURAÇÕES ============ */
+document.querySelectorAll(".semanas button").forEach(b => b.onclick = () => {
+  semanaVista = b.dataset.s; desenharLegenda(); desenhar();
+});
+
+function iniciarConfig() {
+  const c = estado.config;
+  $("cfgMeta").value = c.metaH; $("cfgBloco").value = String(c.blocoMax);
+  $("cfgAcademia").innerHTML = DIAS.map((d, i) =>
+    `<label><input type="checkbox" value="${i}" ${c.academiaDias.includes(i) ? "checked" : ""}>${d}</label>`).join("");
+  $("cfgMeta").onchange = () => { c.metaH = Math.min(10, Math.max(1, +$("cfgMeta").value || 3)); $("cfgMeta").value = c.metaH; salvar(); desenhar(); };
+  $("cfgBloco").onchange = () => { c.blocoMax = +$("cfgBloco").value; salvar(); desenhar(); };
+  $("cfgAcademia").onchange = () => {
+    c.academiaDias = [...$("cfgAcademia").querySelectorAll("input:checked")].map(i => +i.value); salvar(); desenhar();
+  };
+  $("cfgIntervalos").value = c.intervalos.join(", "); $("cfgLimite").value = c.limiteRev;
+  $("cfgIntervalos").onchange = () => {
+    const lista = $("cfgIntervalos").value.split(/[^0-9]+/).map(Number).filter(n => n > 0 && n < 1000);
+    if (lista.length) c.intervalos = lista;
+    $("cfgIntervalos").value = c.intervalos.join(", "); salvar(); desenharTemas();
+  };
+  $("cfgLimite").onchange = () => { c.limiteRev = Math.min(30, Math.max(1, Math.round(+$("cfgLimite").value) || 5)); $("cfgLimite").value = c.limiteRev; salvar(); desenharTemas(); };
+}
+
+/* ============ 8. TEMAS: checklist e revisão espaçada ============ */
+const ESPECIALIDADES = { pediatria: "Pediatria", mulher: "Saúde da Mulher", mental: "Saúde Mental", clinica: "Clínica Médica", outras: "Outras" };
+const STATUS = { a: "A estudar", e: "Estudado", r: "Revisar" };
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const semAcento = t => t.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+const dataStr = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+const hojeStr = () => dataStr(new Date());
+const somarDias = (str, n) => { const [a, m, d] = str.split("-").map(Number); return dataStr(new Date(a, m - 1, d + n)); };
+const dataBR = str => str.slice(8) + "/" + str.slice(5, 7);
+
+let filtroEsp = "todas", filtroStatus = "todos", filtroOrigem = "todas", busca = "", revMostrarTudo = false;
+const ORIGENS = { ci: "CI III (16 semanas)", pal: "Palestras", meu: "Meus temas" };
+const origemDe = t => t.id.split("-")[0];   // "ci-03" → "ci", "pal-10" → "pal", "meu-123" → "meu"
+const daOrigem = t => filtroOrigem === "todas" || origemDe(t) === filtroOrigem;
+const abertos = new Set();   // temas com a lista de objetivos aberta
+
+/* os temas da lista pública ganham os objetivos que você importou */
+const todosTemas = () => [...TEMAS_BASE.map(t => estado.objetivos[t.id] ? { ...t, objetivos: estado.objetivos[t.id] } : t), ...estado.temasProprios];
+const registro = id => estado.temas[id] || (estado.temas[id] = {});
+
+/* a = a estudar · e = estudado · r = revisar (a data da revisão chegou) */
+function situacao(id) {
+  const r = estado.temas[id];
+  if (!r || !r.estudadoEm) return "a";
+  return r.proxima && r.proxima <= hojeStr() ? "r" : "e";
+}
+/* marca a próxima revisão conforme a etapa: etapa 0 usa o 1º intervalo, etapa 1 o 2º... acabou a lista, acabou o ciclo */
+function agendar(r, base = hojeStr()) {
+  const dias = estado.config.intervalos[r.etapa];
+  r.proxima = dias ? somarDias(base, dias) : null;
+}
+function mudarStatus(id, novo) {
+  const r = registro(id), atual = situacao(id);
+  if (novo === atual) return;
+  if (novo === "a") { delete r.estudadoEm; delete r.etapa; delete r.proxima; delete r.revisadoEm; }
+  else if (novo === "e") {
+    if (atual === "r") { r.etapa = (r.etapa || 0) + 1; r.revisadoEm = hojeStr(); }   // revisei
+    else { r.estudadoEm = hojeStr(); r.etapa = 0; }                                  // estudei pela 1ª vez
+    agendar(r);
+  } else {                                                                            // quero revisar já
+    if (!r.estudadoEm) { r.estudadoEm = hojeStr(); r.etapa = 0; }
+    r.proxima = hojeStr();
+  }
+  salvar(); desenharTemas();
+}
+function adiar(id) { registro(id).proxima = somarDias(hojeStr(), 1); salvar(); desenharTemas(); }
+
+function infoTema(id) {
+  const r = estado.temas[id], s = situacao(id);
+  if (s === "a") return "";
+  if (s === "r") return r.proxima === hojeStr() ? "Revisão para hoje" : "Revisão pendente desde " + dataBR(r.proxima);
+  return "Estudado em " + dataBR(r.estudadoEm) + (r.proxima ? " · próxima revisão " + dataBR(r.proxima) : " · revisões concluídas");
+}
+const feitos = t => (t.objetivos || []).filter((_, i) => estado.temas[t.id]?.obj?.[i]).length;
+
+function desenharTemas() {
+  const temas = todosTemas(), hoje = hojeStr();
+
+  // --- revisões do dia (respeitando o limite diário) ---
+  const pendentes = temas.filter(t => situacao(t.id) === "r").sort((a, b) => estado.temas[a.id].proxima.localeCompare(estado.temas[b.id].proxima));
+  const feitasHoje = temas.filter(t => estado.temas[t.id]?.revisadoEm === hoje).length;
+  const vagas = revMostrarTudo ? pendentes.length : Math.max(0, estado.config.limiteRev - feitasHoje);
+  const visiveis = pendentes.slice(0, vagas), resto = pendentes.length - visiveis.length;
+  let rev = `<h2>Revisões de hoje</h2>`;
+  if (!pendentes.length) rev += `<small>${feitasHoje ? `Você revisou ${feitasHoje} tema(s) hoje. ` : ""}Nenhuma revisão pendente.</small>`;
+  for (const t of visiveis) rev += `<div class="rev"><div class="nome">${esc(t.nome)}<small>${ESPECIALIDADES[t.esp]} · ${infoTema(t.id)}</small></div>
+      <button type="button" class="mini principal" data-acao="revisei" data-id="${t.id}">Revisei</button>
+      <button type="button" class="mini" data-acao="adiar" data-id="${t.id}">Adiar para amanhã</button></div>`;
+  if (resto > 0) rev += `<div class="rev"><small class="nome">${visiveis.length ? `Mais ${resto} na fila.` : `Limite de hoje atingido. ${resto} revisão(ões) ficam para os próximos dias.`}</small>
+      <button type="button" class="mini" data-acao="revTudo">Mostrar todas</button></div>`;
+  $("revisoes").innerHTML = rev;
+
+  // --- progresso geral ---
+  const estudados = temas.filter(t => situacao(t.id) !== "a").length;
+  $("progresso").innerHTML = `<b>${estudados} de ${temas.length}</b> temas estudados
+    <div class="barra"><div style="width:${temas.length ? estudados / temas.length * 100 : 0}%"></div></div>`;
+
+  // --- filtros ---
+  const chip = (grupo, valor, texto, ativo) => `<button type="button" data-${grupo}="${valor}" aria-pressed="${ativo}">${texto}</button>`;
+  $("chipsEsp").innerHTML = chip("esp", "todas", "Todas", filtroEsp === "todas") + Object.entries(ESPECIALIDADES).map(([k, nome]) => {
+    const doGrupo = temas.filter(t => t.esp === k && daOrigem(t));
+    return chip("esp", k, `${nome} ${doGrupo.filter(t => situacao(t.id) !== "a").length}/${doGrupo.length}`, filtroEsp === k);
+  }).join("");
+  $("chipsOrigem").innerHTML = chip("or", "todas", "Tudo", filtroOrigem === "todas") + Object.entries(ORIGENS)
+    .filter(([k]) => k !== "meu" || estado.temasProprios.length)   // "Meus temas" só aparece se você tiver criado algum
+    .map(([k, nome]) => chip("or", k, `${nome} ${temas.filter(t => origemDe(t) === k).length}`, filtroOrigem === k)).join("");
+  $("chipsStatus").innerHTML = chip("st", "todos", "Todos", filtroStatus === "todos") +
+    Object.entries(STATUS).map(([k, nome]) => chip("st", k, nome, filtroStatus === k)).join("");
+
+  desenharLista();
+}
+
+function desenharLista() {
+  const q = semAcento(busca.trim());
+  const lista = todosTemas().filter(t => daOrigem(t) && (filtroEsp === "todas" || t.esp === filtroEsp) &&
+    (filtroStatus === "todos" || situacao(t.id) === filtroStatus) && (!q || semAcento(t.nome).includes(q)));
+  if (!lista.length) { $("listaTemas").innerHTML = `<p class="vazio-msg">Nenhum tema com esses filtros.</p>`; return; }
+
+  // com o filtro "CI III" ou "Palestras", a lista segue a ordem das semanas/palestras em vez de agrupar por especialidade
+  const emOrdem = filtroOrigem === "ci" || filtroOrigem === "pal";
+  const cartao = t => {
+    const s = situacao(t.id), info = infoTema(t.id), proprio = t.id.startsWith("meu-"), objs = t.objetivos || [];
+    return `<article class="tema s-${s}">
+      <h3>${esc(t.nome)}</h3>
+      <small>${esc(t.origem)}${emOrdem ? " · " + ESPECIALIDADES[t.esp] : ""}${info ? " · " + info : ""}</small>
+      <div class="status" role="group" aria-label="Status de ${esc(t.nome)}">${Object.entries(STATUS).map(([k, nome]) =>
+        `<button type="button" data-acao="status" data-id="${t.id}" data-v="${k}" aria-pressed="${s === k}">${nome}</button>`).join("")}</div>
+      ${objs.length ? `<details data-id="${t.id}" ${abertos.has(t.id) ? "open" : ""}><summary>Objetivos (${feitos(t)}/${objs.length})</summary><ul>${objs.map((o, i) =>
+        `<li><label><input type="checkbox" data-obj="${i}" data-id="${t.id}" ${estado.temas[t.id]?.obj?.[i] ? "checked" : ""}><span>${esc(o)}</span></label></li>`).join("")}</ul></details>` : ""}
+      <div class="acoes"><button type="button" class="mini" data-acao="registrar" data-id="${t.id}">Registrar estudo</button>
+        ${proprio ? `<button type="button" class="mini" data-acao="editar" data-id="${t.id}">Editar</button>
+        <button type="button" class="mini perigo" data-acao="excluir" data-id="${t.id}">Excluir</button>` : ""}</div>
+    </article>`;
+  };
+
+  if (emOrdem) {
+    lista.sort((a, b) => a.id.localeCompare(b.id));   // "ci-01", "ci-02"... já ficam na ordem certa
+    $("listaTemas").innerHTML = `<h2 class="grupo">${filtroOrigem === "ci" ? "CI III, por semana" : "Palestras, por número"} <small>${lista.length} tema(s)</small></h2>` + lista.map(cartao).join("");
+    return;
+  }
+  let html = "";
+  for (const [k, nome] of Object.entries(ESPECIALIDADES)) {
+    const doGrupo = lista.filter(t => t.esp === k);
+    if (!doGrupo.length) continue;
+    html += `<h2 class="grupo">${nome} <small>${doGrupo.length} tema(s)</small></h2>` + doGrupo.map(cartao).join("");
+  }
+  $("listaTemas").innerHTML = html;
+}
+
+/* cliques dentro da tela de temas */
+$("vTemas").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.esp) { filtroEsp = b.dataset.esp; desenharTemas(); return; }
+  if (b.dataset.st) { filtroStatus = b.dataset.st; desenharTemas(); return; }
+  if (b.dataset.or) { filtroOrigem = b.dataset.or; desenharTemas(); return; }
+  const id = b.dataset.id;
+  switch (b.dataset.acao) {
+    case "status": mudarStatus(id, b.dataset.v); break;
+    case "revisei": mudarStatus(id, "e"); break;
+    case "adiar": adiar(id); break;
+    case "revTudo": revMostrarTudo = true; desenharTemas(); break;
+    case "editar": abrirTema(id); break;
+    case "registrar": abrirRegistro({ temaId: id }); break;
+    case "excluir": {
+      const t = estado.temasProprios.find(x => x.id === id);
+      if (t && confirm(`Excluir o tema “${t.nome}”?`)) {
+        estado.temasProprios = estado.temasProprios.filter(x => x.id !== id); delete estado.temas[id];
+        if (!estado.temasProprios.length && filtroOrigem === "meu") filtroOrigem = "todas";
+        salvar(); desenharTemas();
+      }
+    }
+  }
+});
+$("vTemas").addEventListener("change", e => {
+  const c = e.target; if (c.dataset.obj === undefined) return;
+  const r = registro(c.dataset.id); r.obj = r.obj || {};
+  if (c.checked) r.obj[c.dataset.obj] = true; else delete r.obj[c.dataset.obj];
+  salvar();
+  const t = todosTemas().find(x => x.id === c.dataset.id);
+  c.closest("details").querySelector("summary").textContent = `Objetivos (${feitos(t)}/${t.objetivos.length})`;
+});
+$("vTemas").addEventListener("toggle", e => {   // lembra quais listas de objetivos estão abertas
+  const d = e.target; if (!d.dataset || !d.dataset.id) return;
+  if (d.open) abertos.add(d.dataset.id); else abertos.delete(d.dataset.id);
+}, true);
+$("buscaTema").addEventListener("input", e => { busca = e.target.value; desenharLista(); });
+
+/* adicionar ou editar um tema próprio */
+let temaEditando = null;
+const dlgTema = $("dlgTema");
+$("temaEsp").innerHTML = Object.entries(ESPECIALIDADES).map(([k, nome]) => `<option value="${k}">${nome}</option>`).join("");
+function abrirTema(id) {
+  temaEditando = id;
+  const t = id ? estado.temasProprios.find(x => x.id === id) : null;
+  $("temaTitulo").textContent = t ? "Editar tema" : "Novo tema";
+  $("temaNome").value = t ? t.nome : "";
+  $("temaEsp").value = t ? t.esp : (filtroEsp === "todas" ? "clinica" : filtroEsp);
+  $("temaObj").value = t ? t.objetivos.join("\n") : "";
+  dlgTema.showModal();
+}
+$("btnNovoTema").onclick = () => abrirTema(null);
+$("temaCancelar").onclick = () => dlgTema.close();
+$("temaForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const nome = $("temaNome").value.trim(); if (!nome) return;
+  const objetivos = $("temaObj").value.split("\n").map(x => x.trim()).filter(Boolean);
+  const antigo = estado.temasProprios.find(x => x.id === temaEditando);
+  if (antigo) {
+    if (antigo.objetivos.join("\n") !== objetivos.join("\n") && estado.temas[antigo.id]) delete estado.temas[antigo.id].obj;
+    Object.assign(antigo, { nome, esp: $("temaEsp").value, objetivos });
+  } else estado.temasProprios.push({ id: "meu-" + Date.now(), nome, esp: $("temaEsp").value, origem: "Meu tema", objetivos });
+  salvar(); dlgTema.close(); desenharTemas();
+});
+
+/* ============ 9. EXPORTAR E IMPORTAR DADOS ============ */
+$("btnExportar").onclick = () => {
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(new Blob([JSON.stringify(estado, null, 1)], { type: "application/json" }));
+  link.download = "rotina-estudos-" + hojeStr() + ".json";
+  link.click(); URL.revokeObjectURL(link.href);
+};
+$("btnImportar").onclick = () => $("arqImportar").click();
+$("arqImportar").onchange = async e => {
+  const arq = e.target.files[0]; e.target.value = ""; if (!arq) return;
+  let dados;
+  try { dados = JSON.parse(await arq.text()); } catch (erro) { dados = null; }
+  const resultado = importarDados(dados);
+  if (resultado === "recarregar") location.reload();
+  else if (resultado) { alert(resultado); redesenharTela(); }
+};
+/* aceita dois tipos de arquivo: a cópia completa (Exportar dados) e o arquivo só de objetivos dos temas */
+function importarDados(dados) {
+  if (!dados || typeof dados !== "object") return "Não consegui ler esse arquivo. Ele precisa ser um arquivo exportado por este app.";
+  if (dados.tipo === "objetivos" && dados.objetivos && typeof dados.objetivos === "object") {
+    const conhecidos = new Set(TEMAS_BASE.map(t => t.id)); let n = 0;
+    for (const [id, lista] of Object.entries(dados.objetivos)) {
+      if (!conhecidos.has(id) || !Array.isArray(lista)) continue;
+      estado.objetivos[id] = lista.filter(x => typeof x === "string").map(x => x.slice(0, 400)).slice(0, 40); n++;
+    }
+    if (!n) return "Esse arquivo de objetivos não tem nenhum tema que eu conheça.";
+    salvar(); return `Objetivos carregados em ${n} temas. Seu progresso não foi alterado.`;
+  }
+  if (!dados.config) return "Não consegui ler esse arquivo. Ele precisa ser um arquivo exportado por este app.";
+  if (!confirm("Importar substitui os dados deste aparelho pelos do arquivo. Continuar?")) return "";
+  estado = normalizar(dados); salvar(); return "recarregar";
+}
+
+/* ============ 10. REGISTRO DE ESTUDO, CALENDÁRIO E SEQUÊNCIA ============ */
+const fmtMin = m => m < 60 ? m + " min" : Math.floor(m / 60) + "h" + (m % 60 ? String(m % 60).padStart(2, "0") : "");
+const paraData = str => { const [a, m, d] = str.split("-").map(Number); return new Date(a, m - 1, d); };
+const diasEntre = (a, b) => Math.round((paraData(b) - paraData(a)) / 864e5);
+let calMes = hojeStr().slice(0, 7), calDia = hojeStr();   // mês mostrado e dia selecionado
+
+/* --- registrar um estudo --- */
+const dlgReg = $("dlgReg");
+function abrirRegistro({ temaId = "", data = hojeStr() } = {}) {
+  const temas = todosTemas();
+  $("regTema").innerHTML = `<option value="">Escolha um tema…</option><option value="outro">Outro assunto (escrever)</option>` +
+    Object.entries(ESPECIALIDADES).map(([k, nome]) => `<optgroup label="${nome}">` +
+      temas.filter(t => t.esp === k).map(t => `<option value="${t.id}">${esc(t.nome)}</option>`).join("") + `</optgroup>`).join("");
+  $("regTema").value = temaId; $("regOutro").value = ""; $("regMin").value = 60;
+  $("regData").max = hojeStr(); $("regData").value = data > hojeStr() ? hojeStr() : data;
+  $("regRevisar").checked = false; $("regErro").textContent = "";
+  $("regOutroCampo").hidden = $("regTema").value !== "outro";
+  dlgReg.showModal();
+}
+$("regTema").onchange = () => { $("regOutroCampo").hidden = $("regTema").value !== "outro"; };
+$("regAtalhos").onclick = e => { const b = e.target.closest("button"); if (b) $("regMin").value = b.dataset.min; };
+$("regCancelar").onclick = () => dlgReg.close();
+$("btnRegistrar").onclick = () => abrirRegistro(telaAtual === "calendario" ? { data: calDia } : {});
+
+/* o registro também atualiza o tema: 1º estudo marca "estudado"; se havia revisão pendente, conta como revisão feita */
+function aplicarNoTema(id, data, revisar) {
+  const r = registro(id), s = situacao(id);
+  if (s === "a") { r.estudadoEm = data; r.etapa = 0; agendar(r, data); }
+  else if (s === "r" && !revisar) { r.etapa = (r.etapa || 0) + 1; r.revisadoEm = data; agendar(r, data); }
+  if (revisar) r.proxima = somarDias(data, 1);
+}
+$("regForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const temaId = $("regTema").value, data = $("regData").value, min = Math.round(+$("regMin").value), revisar = $("regRevisar").checked;
+  const erro = msg => { $("regErro").textContent = msg; };
+  if (!temaId) return erro("Escolha um tema.");
+  const tema = todosTemas().find(t => t.id === temaId);
+  const nome = tema ? tema.nome : $("regOutro").value.trim();
+  if (!nome) return erro("Escreva qual foi o assunto.");
+  if (!(min >= 5 && min <= 720)) return erro("O tempo precisa estar entre 5 e 720 minutos.");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(data) || data > hojeStr()) return erro("Escolha um dia até hoje.");
+  estado.registros.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), data, temaId: tema ? temaId : null, nome, min, revisar });
+  if (tema) aplicarNoTema(temaId, data, revisar);
+  calDia = data; calMes = data.slice(0, 7);
+  salvar(); dlgReg.close(); redesenharTela();
+});
+
+/* --- sequência de dias --- */
+function minutosPorDia() {
+  const mapa = {};
+  for (const r of estado.registros) mapa[r.data] = (mapa[r.data] || 0) + r.min;
+  return mapa;
+}
+/* "folga" = quantos dias de pausa seguidos a sequência aguenta. O dia de hoje não conta como pausa enquanto não acabou. */
+function sequencias(mapa) {
+  const folga = estado.config.folga, hoje = hojeStr(), dias = Object.keys(mapa).sort();
+  let atual = 0, pausa = 0, cursor = mapa[hoje] ? hoje : somarDias(hoje, -1);
+  while (dias.length && cursor >= dias[0]) {
+    if (mapa[cursor]) { atual++; pausa = 0; } else if (++pausa > folga) break;
+    cursor = somarDias(cursor, -1);
+  }
+  let maior = 0, corrida = 0;
+  dias.forEach((d, i) => {
+    corrida = i && diasEntre(dias[i - 1], d) - 1 <= folga ? corrida + 1 : 1;
+    maior = Math.max(maior, corrida);
+  });
+  return { atual, maior };
+}
+
+/* --- desenhar o calendário --- */
+function desenharCalendario() {
+  const mapa = minutosPorDia(), hoje = hojeStr(), { atual, maior } = sequencias(mapa);
+  const segunda = somarDias(hoje, -((paraData(hoje).getDay() + 6) % 7));
+  let minSemana = 0, minMes = 0, diasMes = 0;
+  for (const [d, m] of Object.entries(mapa)) {
+    if (d >= segunda && d <= hoje) minSemana += m;
+    if (d.startsWith(calMes)) { minMes += m; diasMes++; }
+  }
+  const s = n => n === 1 ? "dia" : "dias";
+  $("stats").innerHTML =
+    `<div class="stat"><b>${atual} ${s(atual)}</b>${atual ? "sequência atual" : "sequência atual · comece quando quiser"}</div>
+     <div class="stat"><b>${maior} ${s(maior)}</b>maior sequência</div>
+     <div class="stat"><b>${fmtMin(minSemana)}</b>estudados nesta semana</div>
+     <div class="stat"><b>${diasMes} ${s(diasMes)}</b>com estudo no mês mostrado (${fmtMin(minMes)})</div>`;
+
+  const [ano, mes] = calMes.split("-").map(Number), primeiro = new Date(ano, mes - 1, 1);
+  const total = new Date(ano, mes, 0).getDate(), meta = estado.config.metaH * 60;
+  let grade = DIAS.map(d => `<div class="sem">${d}</div>`).join("") + "<div></div>".repeat((primeiro.getDay() + 6) % 7);
+  for (let d = 1; d <= total; d++) {
+    const dia = calMes + "-" + String(d).padStart(2, "0"), m = mapa[dia] || 0;
+    const nivel = !m ? 0 : m < 60 ? 1 : m < meta ? 2 : 3;
+    grade += `<button type="button" data-dia="${dia}" class="n${nivel} ${dia === hoje ? "hoje" : ""} ${dia === calDia ? "sel" : ""}" ${dia > hoje ? "disabled" : ""}
+      aria-label="${d}, ${m ? fmtMin(m) + " de estudo" : "sem estudo"}">${d}${m ? `<small>${fmtMin(m)}</small>` : ""}</button>`;
+  }
+  $("calPainel").innerHTML = `<div class="calTopo">
+      <button type="button" class="mini" data-mes="-1" aria-label="Mês anterior">‹</button>
+      <h2>${primeiro.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}</h2>
+      <button type="button" class="mini" data-mes="1" aria-label="Próximo mês" ${calMes >= hoje.slice(0, 7) ? "disabled" : ""}>›</button></div>
+    <div class="cal">${grade}</div>
+    <div class="calLegenda"><span><i class="n1" style="background:color-mix(in srgb, var(--estudo-bd) 22%, transparent)"></i>menos de 1h</span>
+      <span><i style="background:color-mix(in srgb, var(--estudo-bd) 50%, transparent)"></i>abaixo da meta</span>
+      <span><i style="background:color-mix(in srgb, var(--estudo-bd) 85%, transparent)"></i>meta do dia (${fmtMin(meta)}) ou mais</span></div>`;
+
+  const doDia = estado.registros.filter(r => r.data === calDia);
+  $("diaPainel").innerHTML = `<h2>${dataBR(calDia)}${calDia === hoje ? " · hoje" : ""}${doDia.length ? " · " + fmtMin(mapa[calDia]) : ""}</h2>` +
+    (doDia.length ? "" : `<small>Nenhum estudo registrado neste dia.</small>`) +
+    doDia.map(r => `<div class="rev"><div class="nome">${esc(r.nome)}<small>${fmtMin(r.min)}${r.revisar ? " · marcado para revisar" : ""}</small></div>
+      <button type="button" class="mini perigo" data-acao="excluirReg" data-id="${r.id}">Excluir</button></div>`).join("") +
+    `<div class="rev"><span class="nome"></span><button type="button" class="mini" data-acao="regDia">Registrar estudo neste dia</button></div>`;
+}
+$("vCalendario").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b || b.disabled) return;
+  if (b.dataset.dia) { calDia = b.dataset.dia; desenharCalendario(); }
+  else if (b.dataset.mes) {
+    const [a, m] = calMes.split("-").map(Number), novo = new Date(a, m - 1 + +b.dataset.mes, 1);
+    calMes = dataStr(novo).slice(0, 7); desenharCalendario();
+  }
+  else if (b.dataset.acao === "regDia") abrirRegistro({ data: calDia });
+  else if (b.dataset.acao === "excluirReg") {
+    const r = estado.registros.find(x => x.id === b.dataset.id);
+    if (r && confirm(`Excluir o registro “${r.nome}” (${fmtMin(r.min)})?`)) {
+      estado.registros = estado.registros.filter(x => x.id !== r.id); salvar(); desenharCalendario();
+    }
+  }
+});
+$("cfgFolga").value = String(estado.config.folga);
+$("cfgFolga").onchange = () => { estado.config.folga = +$("cfgFolga").value; salvar(); redesenharTela(); };
+
+/* ============ 11. NAVEGAÇÃO E INÍCIO ============ */
+const TELAS = { horario: "vHorario", temas: "vTemas", calendario: "vCalendario" };
+let telaAtual = "horario";
+function redesenharTela() {
+  if (telaAtual === "temas") desenharTemas();
+  if (telaAtual === "calendario") desenharCalendario();
+}
+function mostrarTela(v) {
+  telaAtual = TELAS[v] ? v : "horario";
+  for (const [k, id] of Object.entries(TELAS)) $(id).hidden = k !== telaAtual;
+  document.querySelectorAll(".nav button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === telaAtual));
+  redesenharTela();
+  try { history.replaceState(null, "", "#" + telaAtual); } catch (e) {}
+}
+document.querySelectorAll(".nav button").forEach(b => b.onclick = () => mostrarTela(b.dataset.v));
+
+iniciarConfig(); desenharLegenda(); desenhar();
+mostrarTela(location.hash.slice(1));
+</script>
+</body>
+</html>
